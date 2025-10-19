@@ -1,10 +1,10 @@
 import uuid
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from extensions import db
+from api.extensions import db
 from datetime import datetime, timezone, timedelta
 from functools import wraps
-import db_models
+import api.db_models as db_models
 import jwt
 api_app = Flask(__name__)
 

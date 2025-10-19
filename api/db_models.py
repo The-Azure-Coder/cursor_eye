@@ -1,5 +1,6 @@
-from extensions import db
+from api.extensions import db
 from sqlalchemy import ForeignKey
+
 
 class Config( db.Model):
     __tablename__ = 'configs'
