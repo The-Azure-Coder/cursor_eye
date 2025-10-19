@@ -9,21 +9,18 @@
 **CursorEye** is an assistive technology web app that uses **real-time eye tracking and facial recognition** to replace traditional mouse input.  
 Users can perform core mouse functionalities — **click, double-click, drag, drop, and scroll** — entirely through eye blinks and facial gestures.
 
-As part of our Hackathon demo, we’ve included a **Tic-Tac-Toe game** that’s fully controllable using CursorEye, showcasing the potential of accessible gaming and real-time interactivity.
-
 ### 💡 Vision
 
 Empower individuals with limited mobility to **participate, create, and work** in the digital world independently.
 
 ---
 
-## ✨ Key Features
+## ✨ Key and Planned Features
 
 - 👁️ **Eye-Based Mouse Control** — Perform clicks and drags using facial gestures
 - 🔄 **Real-Time Updates** — Built using WebSockets for smooth, responsive control
 - 🔒 **User Authentication** — Secure login and personalized settings
 - ⚙️ **Customizable Sensitivity** — Adjust blink thresholds and motion detection
-- 🎮 **Interactive Demo Game** — Play Tic-Tac-Toe hands-free
 - ☁️ **Cloud-Ready Deployment** — Easy to host on AWS, Render, or Railway
 - 🧠 **Assistive Technology Focus** — Designed to improve independence and accessibility
 
