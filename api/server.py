@@ -1,31 +1,29 @@
 import uuid
-from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
 from extensions import db
 from datetime import datetime, timezone, timedelta
 from functools import wraps
 import db_models
-import helpers as JSONResponse
-app = Flask(__name__)
+import jwt
+api_app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'L4BAFopsgrhgGHaNAGpj4CUAY4LnnXAztrrgNwowRgAzADimnWDajZeTNPYaf7hV'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cursor_eye.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+api_app.config['SECRET_KEY'] = 'L4BAFopsgrhgGHaNAGpj4CUAY4LnnXAztrrgNwowRgAzADimnWDajZeTNPYaf7hV'
+api_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cursor_eye.db'
+api_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Database setup
 # -----------------------------
 #  Create database tables
 # -----------------------------
-db.init_app(app)
-with app.app_context():
+db.init_app(api_app)
+with api_app.app_context():
     db.create_all()  # Creates all tables defined above if not existing
 
 
 
-@app.route("/")
+@api_app.route("/")
 def hello_world():
     return jsonify({"Data": "This is a test"})
 
@@ -44,7 +42,7 @@ def token_required(f):
         try:
             token_string = token.split(" ")[1]
             print(token_string)
-            data = jwt.decode(token_string, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(token_string, api_app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = db_models.User.query.filter_by(id=data['id']).first()
         except:
             return jsonify({'message': 'Token is invalid!'}), 401
@@ -54,7 +52,7 @@ def token_required(f):
     return decorated
 
 
-@app.route("/auth/login",  methods=['POST'])
+@api_app.route("/auth/login",  methods=['POST'])
 def login():
     # Confirm the information that is passed to the api is valid
     # Find the user that matches the username or email.
@@ -71,14 +69,14 @@ def login():
             return jsonify({'message': 'Invalid email or password'}), 401
 
         token = jwt.encode({'id': user.id, 'exp': datetime.now(timezone.utc) + timedelta(hours=1)}, 
-                           app.config['SECRET_KEY'], algorithm="HS256")
+                           api_app.config['SECRET_KEY'], algorithm="HS256")
 
         return jsonify({"message": "Successfully logged in", "accessToken": token})
 
     return
 
 
-@app.route("/auth/register", methods=['POST'])
+@api_app.route("/auth/register", methods=['POST'])
 def signUp(): 
     if request.method == 'POST':
         data = request.json
@@ -100,7 +98,7 @@ def signUp():
     return jsonify({'message': 'Method not available for this route'}), 400
 
 
-@app.route("/config", methods=['GET', 'POST'])
+@api_app.route("/config", methods=['GET', 'POST'])
 @token_required
 def configRoute(current_user:db_models.User):
     if request.method == 'GET':
@@ -115,10 +113,9 @@ def configRoute(current_user:db_models.User):
         return jsonify({"message": "Will work on this soon"})
 
 
-@app.route("/config/options", methods=['GET'])
+@api_app.route("/config/options", methods=['GET'])
 def configOptions():
     if request.method == 'GET':
         return
 
 
-app.run()
