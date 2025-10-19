@@ -5,7 +5,7 @@ import threading
 import time
 import base64
 from models.eye_data import EyeData
-
+from api.db_models import Config as ConfigOption
 class EyeTrackingService:
     def __init__(self):
         self.eye_data = EyeData()
@@ -39,7 +39,16 @@ class EyeTrackingService:
         except Exception as e:
             print(f"Camera initilization fail {e}")
             self.cam = None
-    
+
+    def setCameraDataFromConfig(self, configOption: ConfigOption):
+        try:
+            self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, configOption.videoWidth),
+            self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, configOption.videoHeight)
+            self.cam.set(cv2.CAP_PROP_FPS, configOption.fps)
+        except Exception as e:
+            print(f"")
+            self.cam = None
+
     def start_tracking(self, socketio_instance):
         """Start eye tracking with WebSocket emission"""
         if not self.cam or not self.cam.isOpened():
@@ -213,3 +222,6 @@ class EyeTrackingService:
     def is_camera_available(self):
         """Check if camera is available"""
         return self.cam is not None and self.cam.isOpened()
+    
+
+ets = EyeTrackingService()

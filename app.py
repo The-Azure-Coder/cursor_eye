@@ -2,7 +2,9 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from api.extensions import db
 from config import config
-from services.eye_tracking_service import EyeTrackingService
+from flask_cors import CORS
+
+from services.eye_tracking_service import ets
 from controllers.eye_tracker_controller import EyeTrackerController
 from routes.api import create_api_blueprint
 from api.server import createRestRoutes
@@ -11,11 +13,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.SQLALCHEMY_TRACK_MODIFICATIONS
-
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
 
 db.init_app(app)
+CORS(app)
 # Database setup
 # -----------------------------
 #  Create database tables
@@ -24,7 +26,7 @@ with app.app_context():
     db.create_all()  # Creates all tables defined above if not existing
 
 # Initialize services and controllers
-eye_tracking_service = EyeTrackingService()
+eye_tracking_service = ets
 eye_tracker_controller = EyeTrackerController(eye_tracking_service)
 
 # Register API routes with dependency injection

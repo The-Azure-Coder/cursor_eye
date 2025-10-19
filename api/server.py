@@ -8,7 +8,7 @@ from functools import wraps
 import api.db_models as db_models
 import jwt
 from config import config
-
+from services.eye_tracking_service import ets
 
 def createRestRoutes():
     rest_bp = Blueprint('rest', __name__)
@@ -61,8 +61,13 @@ def createRestRoutes():
 
             token = jwt.encode({'id': user.id, 'exp': datetime.now(timezone.utc) + timedelta(hours=1)}, 
                             config.SECRET_KEY, algorithm="HS256")
-
-            return jsonify({"message": "Successfully logged in", "accessToken": token})
+            print(user)
+            userFound = {
+                'firstName': user.first_name,
+                'lastName': user.last_name,
+                'email': user.email,
+            }
+            return jsonify({"message": "Successfully logged in", "data": {"accessToken": token, "user": userFound}})
 
         return
 
@@ -95,13 +100,35 @@ def createRestRoutes():
         if request.method == 'GET':
             configData = db_models.Config.query.filter_by(userId = current_user.id).first()
             if(configData):
-                return jsonify({"message": "Configuration found", "data": configData})
-            return jsonify({"message": "No configuration found with this id"})
+                configDataJson = {
+                    "videoHeight" : configData.videoHeight,
+                    "videoWidth": configData.videoWidth,
+                    "fps" : configData.fps,
+                    "resolution" : configData.resolution,
+                    "id" : configData.id
+                    }
+                return jsonify({"message": "Configuration found", "data": configDataJson})
+            
+            defaultStoredConfig = {
+                "videoHeight": 480,
+                "videoWidth": 640,
+                "fps": 30
+            }
+            return jsonify({"message": "No configuration found with this id. Using default", "data": defaultStoredConfig})
 
         if request.method == 'POST':
             data = request.json
+            videoHeight = data['videoHeight']
+            videowidth = data['videoWidth']
+            fps = data['fps']
+            resolution = data['resolution']
+            newConfigData = db_models.Config(id=str(uuid.uuid4()), userId = current_user.id, videoHeight=videoHeight, videowidth=videowidth, fps=fps, resolution = resolution)
+            ets.setCameraDataFromConfig(newConfigData)
+            db.session.add(newConfigData)
+            db.session.commit()
 
-            return jsonify({"message": "Will work on this soon"})
+            return jsonify({"message": "Created the config for the user successfully"})
+        return jsonify({"message": "Unable to complete task"})
 
 
     @rest_bp.route("/rest/config/options", methods=['GET'])
