@@ -39,6 +39,11 @@ class EyeTrackingService:
         except Exception as e:
             print(f"Camera initilization fail {e}")
             self.cam = None
+            
+    def apply_config_from_db(self):
+        config = ConfigOption.query.first()
+        if config:
+            self.setCameraDataFromConfig(config)
 
     def setCameraDataFromConfig(self, configOption: ConfigOption):
         try:
