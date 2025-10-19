@@ -3,7 +3,6 @@ import subprocess
 import sys
 import requests
 from clients.cursor_client import EyeControlClient
-from api import server
 def is_server_ready(url="http://localhost:5000", timeout=90):
     """Check if the server is ready to accept connections"""
     print("Waiting for server to be ready...")
@@ -40,7 +39,7 @@ def main():
         try:
             client = EyeControlClient()
             client.run()
-            server.api_app.run("http://localhost",5050)
+            print("Almost there")
         except Exception as e:
             print(f"Client error: {e}")
     else:
@@ -49,5 +48,6 @@ def main():
     # Cleanup subprocess
     server_process.terminate()
 
+    
 if __name__ == '__main__':
     main()

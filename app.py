@@ -1,17 +1,27 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-
+from api.extensions import db
 from config import config
 from services.eye_tracking_service import EyeTrackingService
 from controllers.eye_tracker_controller import EyeTrackerController
 from routes.api import create_api_blueprint
-
+from api.server import createRestRoutes
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.SQLALCHEMY_TRACK_MODIFICATIONS
 
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+
+db.init_app(app)
+# Database setup
+# -----------------------------
+#  Create database tables
+# -----------------------------
+with app.app_context():
+    db.create_all()  # Creates all tables defined above if not existing
 
 # Initialize services and controllers
 eye_tracking_service = EyeTrackingService()
@@ -19,8 +29,9 @@ eye_tracker_controller = EyeTrackerController(eye_tracking_service)
 
 # Register API routes with dependency injection
 api_bp = create_api_blueprint(eye_tracker_controller, socketio)
+rest_bp = createRestRoutes()
 app.register_blueprint(api_bp)
-
+app.register_blueprint(rest_bp)
 # WebSocket events
 @socketio.on('connect')
 def handle_connect():
@@ -63,5 +74,14 @@ if __name__ == '__main__':
     print(f"Webcam: {'Available' if eye_tracking_service.is_camera_available() else 'Unavailable'}")
     print("Eye tracking system ready!")
     print("Emergency stop: Visit http://localhost:5000/emergency_stop")
-    
     socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+    # t1 = threading.Thread(target= socketio.run(app, host='0.0.0.0', port=5000, debug=False))
+    # t2 = threading.Thread(target= server.api_app.run("127.0.0.1",5050))
+
+    # t1.start()
+    # t2.start()
+
+    # t1.join()
+    # t2.join()
+
+    
