@@ -46,7 +46,7 @@ class EyeTrackingService:
             self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, configOption.videoHeight)
             self.cam.set(cv2.CAP_PROP_FPS, configOption.fps)
         except Exception as e:
-            print(f"")
+            print(f"{e}")
             self.cam = None
 
     def start_tracking(self, socketio_instance):

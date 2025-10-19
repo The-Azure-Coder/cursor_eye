@@ -121,14 +121,38 @@ def createRestRoutes():
             videoHeight = data['videoHeight']
             videowidth = data['videoWidth']
             fps = data['fps']
-            resolution = data['resolution']
-            newConfigData = db_models.Config(id=str(uuid.uuid4()), userId = current_user.id, videoHeight=videoHeight, videowidth=videowidth, fps=fps, resolution = resolution)
-            ets.setCameraDataFromConfig(newConfigData)
+            resolution = 720
+            newConfigData = db_models.Config(id=str(uuid.uuid4()), userId = current_user.id, videoHeight=videoHeight, videoWidth=videowidth, fps=fps, resolution = resolution)
             db.session.add(newConfigData)
             db.session.commit()
+            ets.setCameraDataFromConfig(newConfigData)
 
             return jsonify({"message": "Created the config for the user successfully"})
-        return jsonify({"message": "Unable to complete task"})
+        return jsonify({"message": "Unable to complete task"}), 400
+    
+    @rest_bp.route("/rest/config/reset", methods=[ 'PUT'])
+    @token_required
+    def configResetRoute(current_user:db_models.User):
+        defaultStoredConfig = {
+            "videoHeight": 480,
+            "videoWidth": 640,
+            "fps": 30
+        }
+        if request.method == 'PUT':
+           
+            resolution = 720
+            configData = db_models.Config.query.filter_by(userId = current_user.id).first()
+            configData.videoHeight = defaultStoredConfig["videoHeight"]
+            configData.videoWidth = defaultStoredConfig["videoWidth"]
+            configData.fps = defaultStoredConfig["fps"]
+
+            db.session.commit()
+            ets.setCameraDataFromConfig(configData)
+
+            return jsonify({"message": "Created the config for the user successfully"})
+        return jsonify({"message": "Unable to complete task"}), 400
+    
+
 
 
     @rest_bp.route("/rest/config/options", methods=['GET'])

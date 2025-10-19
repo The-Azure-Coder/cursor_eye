@@ -5,9 +5,9 @@ from sqlalchemy import ForeignKey
 class Config( db.Model):
     __tablename__ = 'configs'
     id = db.Column(db.String, primary_key=True)
-    resolution = db.Column(db.String(50), unique=True)
+    resolution = db.Column(db.String(50))
     fps = db.Column(db.String(100))
-    videoWidth = db.Column(db.String(70), unique=True)
+    videoWidth = db.Column(db.String(70))
     videoHeight = db.Column(db.String(80))
     userId = db.Column(db.String(100),ForeignKey("users.id"))
 
